@@ -83,6 +83,7 @@ function crawl(){
       }
       next(null)
     }).catch(function(err){
+      client.saddAsync("lightinthebox-tmp", url);
       next(err)
     })
   }], function(err){
@@ -116,9 +117,6 @@ function productDetail(url, cookie){
         }else{
           reject(err)
         }
-      }).on('error', function(err) {
-        console.log(err)
-        reject(err)
       })
     });
 }
