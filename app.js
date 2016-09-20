@@ -90,6 +90,7 @@ function search(keyword, cookie, page){
             'Cookie': cookie,
             uri: "http://www.lightinthebox.com/index.php",
             method: 'GET',
+            timeout: 12000,
             qs: params
         }
         request(options, function(err, httpRes, body){
