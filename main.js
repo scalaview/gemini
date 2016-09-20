@@ -62,7 +62,7 @@ function crawl(){
     productDetail(url, cookie).then(function(body){
       var $ = cheerio.load(body),
           title = $(".prod-info-title h1").text().trim(),
-          imgs = $(".infinite-carousel .viewport img").map(function(i, e){ return $(e).attr("src") }).get(),
+          imgs = $(".infinite-carousel .viewport img").map(function(i, e){ return $(e).attr("src").replace("50x50", "384x384") }).get(),
           price = $(".sale-price ").text().trim(),
           specifications = $(".prod-description-specifications").html(),
           gallery = $(".prod-description-gallery").html()
