@@ -7,6 +7,7 @@ var redis = require('redis');
 Promise.promisifyAll(redis.RedisClient.prototype);
 Promise.promisifyAll(redis.Multi.prototype);
 var client = redis.createClient();
+var keywords = require("./keywords");
 
 function initPage(keyword){
   async.waterfall([function(next){
@@ -28,6 +29,7 @@ function initPage(keyword){
   }, function(cookie, next){
     //first page
     search(keyword, cookie, 1).then(function(body){
+      console.log("first page", keyword)
       var $ = cheerio.load(body)
       if(!$(".no-result-tips").length){
         next(null, cookie)
@@ -38,21 +40,31 @@ function initPage(keyword){
       next(err)
     })
   }, function(cookie, next){
-    for(var i=1; i<2; i++){
-      search(keyword, cookie, i).then(function(body){
-        var $ = cheerio.load(body)
-        $(".search-list .item-new").each(function(i, e){
-          var img = $(e).find(".img-box img").attr("src")
-              link = $(e).find(".p-box.ctr-track").attr("href")
-              console.log(img, link)
-          client.saddAsync("lightinthebox", link)
-          client.saddAsync("lightinthebox-tmp", link)
-          client.hmsetAsync([link, "img", img])
+    async.each([1, 2, 3, 4, 5, 6], function(i, pass){
+      setTimeout(function(){
+        search(keyword, cookie, i).then(function(body){
+          console.log("get", keyword, "page", i)
+          var $ = cheerio.load(body)
+          $(".search-list .item-new").each(function(i, e){
+            var img = $(e).find(".img-box img").attr("src")
+                link = $(e).find(".p-box.ctr-track").attr("href")
+                console.log(img, link)
+            client.saddAsync("lightinthebox", link)
+            client.saddAsync("lightinthebox-tmp", link)
+            client.hmsetAsync([link, "img", img])
+          })
+          pass(null)
+        }).catch(function(err){
+          pass(err)
         })
-      }).catch(function(err){
+      }, 2000)
+    }, function(err){
+      if(err){
         next(err)
-      })
-    }
+      }else{
+        next(null)
+      }
+    })
   }], function(err){
     if(err){
       console.log(err)
@@ -90,4 +102,11 @@ function search(keyword, cookie, page){
     });
 }
 
-initPage("lipstick")
+function main(){
+  async.each(keywords, function(keyword, next){
+    initPage(keyword)
+  })
+}
+
+main()
+

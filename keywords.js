@@ -1,0 +1,25 @@
+module.exports = [
+"jeffree star liquid lipstick",
+"velvetines",
+"jeffree star lipstick",
+"lipstick",
+"la girl",
+"makeup sponge",
+"kylie jenner lip kit matte liquid lipsticks",
+"banana powder",
+"eye liner",
+"huda beauty",
+"false eyelashes",
+"fan brush",
+"labiales",
+"brush cleaner",
+"eyebrow pencil",
+"eyeliner",
+"eyelashes",
+"lime crime",
+"eyelash extension",
+"Cosmetic Cases Travel Bag",
+"matte lipstick",
+"colourpop"
+]
+

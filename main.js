@@ -58,15 +58,14 @@ function crawl(){
       next(err)
     })
   }, function(url, next){
-    console.log("get", url)
     productDetail(url, cookie).then(function(body){
       var $ = cheerio.load(body),
           title = $(".prod-info-title h1").text().trim(),
           imgs = $(".infinite-carousel .viewport img").map(function(i, e){ return $(e).attr("src").replace("50x50", "384x384") }).get(),
-          price = $(".sale-price ").text().trim(),
-          specifications = $(".prod-description-specifications").html(),
-          gallery = $(".prod-description-gallery").html()
-
+          price = $(".sale-price ").text().trim().replace("$", ""),
+          specifications = $(".prod-description-specifications").html() || "",
+          gallery = $(".prod-description-gallery").html() || "",
+          desc_imgs = $(gallery).find("img").map(function(i, e){ return $(e).attr("src") }).get()
       imgs.unshift("imgs|"+url)
       client.send_command("lpush", imgs, function(err, result){
         if(err){
@@ -74,12 +73,23 @@ function crawl(){
         }
       });
       client.hmsetAsync([url, "title", title, "price", price, "specifications", specifications, "gallery", gallery])
+      if(desc_imgs && desc_imgs.length){
+        desc_imgs.unshift("desc|"+url)
+        client.send_command("lpush", desc_imgs, function(err, result){
+          if(err){
+            console.log(err)
+          }
+        });
+      }
       next(null)
     }).catch(function(err){
+      console.log("get fail")
       next(err)
     })
   }], function(err){
-    console.log(err)
+    if(err){
+      console.log(err)
+    }
     setTimeout(function(){
       crawl(cookie)
     }, 2000)
@@ -99,6 +109,7 @@ function productDetail(url, cookie){
             method: 'GET'
         }
       request(options, function(err, httpRes, body){
+        console.log("get", url)
         if (!err && httpRes.statusCode == 200) {
           resolve(body)
         }else{
@@ -108,4 +119,4 @@ function productDetail(url, cookie){
     });
 }
 
-main()
+main();
