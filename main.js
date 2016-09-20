@@ -83,7 +83,6 @@ function crawl(){
       }
       next(null)
     }).catch(function(err){
-      console.log("get fail")
       next(err)
     })
   }], function(err){
@@ -106,8 +105,10 @@ function productDetail(url, cookie){
             },
             'Cookie': cookie,
             uri: url,
+            timeout: 12000,
             method: 'GET'
         }
+
       request(options, function(err, httpRes, body){
         console.log("get", url)
         if (!err && httpRes.statusCode == 200) {
@@ -115,6 +116,9 @@ function productDetail(url, cookie){
         }else{
           reject(err)
         }
+      }).on('error', function(err) {
+        console.log(err)
+        reject(err)
       })
     });
 }
