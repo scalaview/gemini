@@ -3,7 +3,10 @@ var async = require("async");
 var request = require("request");
 var Promise = require("bluebird");
 var cheerio = require("cheerio");
-
+var redis = require('redis');
+Promise.promisifyAll(redis.RedisClient.prototype);
+Promise.promisifyAll(redis.Multi.prototype);
+var client = redis.createClient();
 
 function initPage(keyword){
   async.waterfall([function(next){
@@ -17,7 +20,6 @@ function initPage(keyword){
       }
     request(options, function(err, httpRes, body){
       if (!err && httpRes.statusCode == 200) {
-        console.log(httpRes.headers['set-cookie'])
         next(null, httpRes.headers['set-cookie'])
       }else{
         next(err)
@@ -43,6 +45,9 @@ function initPage(keyword){
           var img = $(e).find(".img-box img").attr("src")
               link = $(e).find(".p-box.ctr-track").attr("href")
               console.log(img, link)
+          client.saddAsync("lightinthebox", link)
+          client.saddAsync("lightinthebox-tmp", link)
+          client.hmsetAsync([link, "img", img])
         })
       }).catch(function(err){
         next(err)
